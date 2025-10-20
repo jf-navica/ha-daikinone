@@ -44,7 +44,11 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
 
     # create daikin one connector
     data = DaikinOneData(
-        hass, entry, DaikinOne(DaikinUserCredentials(entry.data[CONF_EMAIL], entry.data[CONF_PASSWORD]))
+        hass,
+        entry,
+        DaikinOne(
+            DaikinUserCredentials(email=entry.data[CONF_EMAIL], password=entry.data[CONF_PASSWORD])
+        ),
     )
     await data.update()
     hass.data[DOMAIN] = data

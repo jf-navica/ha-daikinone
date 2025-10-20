@@ -30,7 +30,7 @@ class DaikinOneConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             password = user_input[CONF_PASSWORD]
 
             # check auth before finishing setup to ensure credentials work
-            daikin = DaikinOne(DaikinUserCredentials(email, password))
+            daikin = DaikinOne(DaikinUserCredentials(email=email, password=password))
             ok = await daikin.login()
 
             if ok is False:

@@ -9,8 +9,6 @@ from typing import Any
 import aiohttp
 from aiohttp import ClientError
 from pydantic import BaseModel
-from pydantic.dataclasses import dataclass
-
 from .exceptions import DaikinServiceException
 from custom_components.daikinone.utils import Temperature
 
@@ -24,28 +22,24 @@ DAIKIN_API_URL_DEVICES = urljoin(DAIKIN_API_URL_BASE, "/devices")
 DAIKIN_API_URL_DEVICE_DATA = urljoin(DAIKIN_API_URL_BASE, "/deviceData")
 
 
-@dataclass
-class DaikinUserCredentials:
+class DaikinUserCredentials(BaseModel):
     email: str
     password: str
 
 
-@dataclass
-class DaikinDevice:
+class DaikinDevice(BaseModel):
     id: str
     name: str
     model: str
     firmware_version: str
 
 
-@dataclass
-class DaikinEquipment(DaikinDevice):
+class DaikinEquipment(DaikinDevice, extra="allow"):
     thermostat_id: str
     serial: str
 
 
-@dataclass
-class DaikinIndoorUnit(DaikinEquipment):
+class DaikinIndoorUnit(DaikinEquipment, extra="allow"):
     mode: str
     current_airflow: int
     fan_demand_requested_percent: int
@@ -71,8 +65,7 @@ class DaikinOutdoorUnitHeaterStatus(Enum):
     UNKNOWN = 255
 
 
-@dataclass
-class DaikinOutdoorUnit(DaikinEquipment):
+class DaikinOutdoorUnit(DaikinEquipment, extra="allow"):
     inverter_software_version: str | None
     total_runtime: timedelta
     mode: str
@@ -116,8 +109,7 @@ class DaikinOneAirQualitySensorSummaryLevel(Enum):
     HAZARDOUS = 3
 
 
-@dataclass
-class DaikinOneAirQualitySensorOutdoor:
+class DaikinOneAirQualitySensorOutdoor(BaseModel):
     aqi: int
     aqi_summary_level: DaikinOneAirQualitySensorSummaryLevel
     particles_microgram_m3: int
@@ -125,8 +117,7 @@ class DaikinOneAirQualitySensorOutdoor:
     ozone_microgram_m3: int
 
 
-@dataclass
-class DaikinOneAirQualitySensorIndoor:
+class DaikinOneAirQualitySensorIndoor(BaseModel):
     aqi: int
     aqi_summary_level: DaikinOneAirQualitySensorSummaryLevel
     # TODO: see if there is unit data available from somewhere
@@ -136,8 +127,7 @@ class DaikinOneAirQualitySensorIndoor:
     voc_summary_level: DaikinOneAirQualitySensorSummaryLevel
 
 
-@dataclass
-class DaikinEEVCoil(DaikinEquipment):
+class DaikinEEVCoil(DaikinEquipment, extra="allow"):
     indoor_superheat_temperature: Temperature
     liquid_temperature: Temperature
     suction_temperature: Temperature
@@ -166,8 +156,7 @@ class DaikinThermostatStatus(Enum):
     IDLE = 5
 
 
-@dataclass
-class DaikinThermostatSchedule:
+class DaikinThermostatSchedule(BaseModel):
     enabled: bool
 
 
@@ -175,7 +164,9 @@ class DaikinThermostatFanMode(Enum):
     OFF = 0
     ALWAYS_ON = 1
     SCHEDULED = 2
-
+    LOW = 0
+    MEDIUM = 1
+    HIGH = 2
 
 class DaikinThermostatFanSpeed(Enum):
     LOW = 0
@@ -183,8 +174,7 @@ class DaikinThermostatFanSpeed(Enum):
     HIGH = 2
 
 
-@dataclass
-class DaikinThermostat(DaikinDevice):
+class DaikinThermostat(DaikinDevice, extra="allow"):
     location_id: str
     online: bool
     capabilities: set[DaikinThermostatCapability]
@@ -221,8 +211,7 @@ class DaikinDeviceDataResponse(BaseModel):
 class DaikinOne:
     """Manages connection to Daikin API and fetching device data"""
 
-    @dataclass
-    class _AuthState:
+    class _AuthState(BaseModel):
         authenticated: bool = False
         refresh_token: str | None = None
         access_token: str | None = None
